@@ -51,7 +51,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Modal Add Note -->
     <div class="modal fade" id="addNoteModal" tabindex="-1" aria-labelledby="addNoteModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
                 <div class="modal-header bg-primary text-white">
                     <h5 class="modal-title" id="addNoteModalLabel">Tambah Catatan Baru</h5>
@@ -66,21 +66,33 @@
                                 class="form-control @error('judul') is-invalid @enderror"
                                 id="judul"
                                 name="judul"
-                                required>
+                                required
+                                autocomplete="off">
                             @error('judul')
                             <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
+                            <div class="valid-feedback">
+                                Judul tersedia!
+                            </div>
                         </div>
                         <div class="mb-3">
                             <label for="isi" class="form-label">Isi Catatan</label>
                             <textarea class="form-control @error('isi') is-invalid @enderror"
                                 id="isi"
                                 name="isi"
-                                rows="4"
-                                required></textarea>
+                                rows="6"
+                                required
+                                style="resize: vertical"
+                                autocomplete="off"></textarea>
                             @error('isi')
                             <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
+                            <div class="valid-feedback">
+                                Isi tersedia!
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-muted small">Minimal 10 karakter untuk isi catatan</span>
                         </div>
                     </form>
                 </div>
@@ -98,17 +110,23 @@
 </body>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const form = document.getElementById('addNoteForm');
+        // Tombol untuk membuka modal
+        const btnAddNote = document.querySelector('.btn-add-note');
+        const modal = new bootstrap.Modal(document.getElementById('addNoteModal'));
 
-        form?.addEventListener('submit', async function(e) {
+        // Buka modal saat tombol diklik
+        btnAddNote?.addEventListener('click', () => modal.show());
+
+        // Reset form saat modal ditutup
+        document.getElementById('addNoteModal')?.addEventListener('hidden.bs.modal', function() {
+            document.getElementById('addNoteForm').reset();
+        });
+
+        // Handle submit form
+        document.getElementById('addNoteForm')?.addEventListener('submit', async function(e) {
             e.preventDefault();
 
             try {
-                // Tampilkan loading state
-                const submitBtn = this.querySelector('[type="submit"]');
-                submitBtn.disabled = true;
-                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Menyimpan...';
-
                 const formData = new FormData(this);
                 const response = await fetch(this.action, {
                     method: this.method,
@@ -121,25 +139,18 @@
                 const result = await response.json();
 
                 if (result.success) {
-                    // Tutup modal dan reset form
-                    const modal = bootstrap.Modal.getInstance(document.getElementById('addNoteModal'));
+                    // Tutup modal
                     modal.hide();
+
+                    // Reset form
                     this.reset();
 
                     // Muat ulang halaman
                     location.reload();
-                } else {
-                    alert(result.message || 'Terjadi kesalahan');
                 }
-
             } catch (error) {
                 console.error('Error:', error);
-                alert('Terjadi kesalahan saat menyimpan data. Silakan coba lagi.');
-            } finally {
-                // Reset loading state
-                const submitBtn = this.querySelector('[type="submit"]');
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = 'Simpan';
+                alert('Terjadi kesalahan saat menyimpan data');
             }
         });
     });

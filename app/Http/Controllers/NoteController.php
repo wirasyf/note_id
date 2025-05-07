@@ -20,32 +20,25 @@ class NoteController extends Controller
   }
 
   public function store(Request $request)
-{
-    try {
-        $request->validate([
-            'judul' => 'required|string|max:255',
-            'isi' => 'required|string|min:10'
-        ], [
-            'judul.required' => 'Judul wajib diisi',
-            'judul.max' => 'Judul maksimal 255 karakter',
-            'isi.required' => 'Isi catatan wajib diisi',
-            'isi.min' => 'Isi catatan minimal 10 karakter'
-        ]);
+  {
+    $request->validate([
+      'judul' => 'required|string|max:255',
+      'isi' => 'required|string|min:10'
+    ], [
+      'judul.required' => 'Judul wajib diisi',
+      'judul.max' => 'Judul maksimal 255 karakter',
+      'isi.required' => 'Isi catatan wajib diisi',
+      'isi.min' => 'Isi catatan minimal 10 karakter'
+    ]);
 
-        $note = Note::create($request->all());
-        
-        return response()->json([
-            'success' => true,
-            'message' => 'Catatan berhasil dibuat',
-            'data' => $note
-        ]);
-    } catch (\Exception $e) {
-        return response()->json([
-            'success' => false,
-            'message' => $e->getMessage()
-        ], 422);
-    }
-}
+    $note = Note::create($request->all());
+
+    return response()->json([
+      'success' => true,
+      'message' => 'Catatan berhasil dibuat',
+      'data' => $note
+    ]);
+  }
 
   public function edit(Note $note)
   {
