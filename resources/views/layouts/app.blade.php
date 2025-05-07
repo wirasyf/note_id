@@ -38,90 +38,111 @@
             box-shadow: 0 8px 12px rgba(0, 0, 0, 0.1);
         }
 
-        .notes-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 20px;
-            padding: 20px;
-        }
-
-        .note-card {
-            height: 200px;
-            overflow: hidden;
-        }
-
         .note-content {
-            padding: 15px;
-            height: calc(100% - 40px);
-            overflow-y: auto;
-        }
-
-        .note-actions {
-            position: absolute;
-            bottom: 10px;
-            right: 10px;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .note-card:hover .note-actions {
-            opacity: 1;
-        }
-
-        .form-container {
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .form-card {
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .form-card h2 {
-            text-align: center;
-            color: #2d3436;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            color: #2d3436;
-            font-weight: 500;
-        }
-
-        .form-group input,
-        .form-group textarea {
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            padding: 12px;
-            transition: all 0.3s ease;
-        }
-
-        .form-group input:focus,
-        .form-group textarea:focus {
-            border-color: #6c5ce7;
-            box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.2);
-        }
-
-        .btn-container {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            margin-top: 20px;
+            white-space: pre-wrap;
         }
     </style>
 </head>
 
 <body>
-    <div class="container-fluid mt-4">
+    <div class="container mt-4">
         @yield('content')
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Modal Add Note -->
+    <div class="modal fade" id="addNoteModal" tabindex="-1" aria-labelledby="addNoteModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="addNoteModalLabel">Tambah Catatan Baru</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addNoteForm" method="POST" action="{{ route('notes.store') }}" class="needs-validation" novalidate>
+                        @csrf
+                        <div class="mb-3">
+                            <label for="judul" class="form-label">Judul</label>
+                            <input type="text"
+                                class="form-control @error('judul') is-invalid @enderror"
+                                id="judul"
+                                name="judul"
+                                required>
+                            @error('judul')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <div class="mb-3">
+                            <label for="isi" class="form-label">Isi Catatan</label>
+                            <textarea class="form-control @error('isi') is-invalid @enderror"
+                                id="isi"
+                                name="isi"
+                                rows="4"
+                                required></textarea>
+                            @error('isi')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-arrow-left"></i> Batal
+                    </button>
+                    <button type="submit" class="btn btn-primary" form="addNoteForm">
+                        <i class="fas fa-save"></i> Simpan
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('addNoteForm');
+
+        form?.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            try {
+                // Tampilkan loading state
+                const submitBtn = this.querySelector('[type="submit"]');
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Menyimpan...';
+
+                const formData = new FormData(this);
+                const response = await fetch(this.action, {
+                    method: this.method,
+                    body: formData,
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    }
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // Tutup modal dan reset form
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('addNoteModal'));
+                    modal.hide();
+                    this.reset();
+
+                    // Muat ulang halaman
+                    location.reload();
+                } else {
+                    alert(result.message || 'Terjadi kesalahan');
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Terjadi kesalahan saat menyimpan data. Silakan coba lagi.');
+            } finally {
+                // Reset loading state
+                const submitBtn = this.querySelector('[type="submit"]');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'Simpan';
+            }
+        });
+    });
+</script>
 
 </html>

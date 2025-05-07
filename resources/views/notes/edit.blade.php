@@ -1,33 +1,48 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="row">
-    <div class="col-md-6 offset-md-3">
-        <div class="card note-card">
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
             <div class="card-header bg-primary text-white">
-                <h2 class="card-title text-center mb-0">Ubah Catatan</h2>
+                <h2 class="card-title mb-0">Ubah Catatan</h2>
             </div>
             <div class="card-body">
-                <form method="POST" action="{{ route('notes.update', $note->id) }}" enctype="multipart/form-data">
+                <form method="POST" action="{{ route('notes.update', $note->id) }}" id="editForm">
                     @csrf
                     @method('PUT')
+
                     <div class="mb-3">
-                        <label for="judul" class="form-label">Judul Catatan</label>
-                        <input type="text" class="form-control" id="judul" name="judul" required
+                        <label for="judul" class="form-label">Judul</label>
+                        <input type="text"
+                            id="judul"
+                            name="judul"
+                            class="form-control @error('judul') is-invalid @enderror"
                             value="{{ old('judul', $note->judul) }}"
-                            placeholder="Masukkan judul catatan">
+                            required>
+                        @error('judul')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
                     </div>
+
                     <div class="mb-3">
                         <label for="isi" class="form-label">Isi Catatan</label>
-                        <textarea class="form-control" id="isi" name="isi" rows="5" required
-                            placeholder="Tulis isi catatan Anda di sini...">{{ old('isi', $note->isi) }}</textarea>
+                        <textarea class="form-control @error('isi') is-invalid @enderror"
+                            id="isi"
+                            name="isi"
+                            rows="8"
+                            required>{{ old('isi', $note->isi) }}</textarea>
+                        @error('isi')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
                     </div>
-                    <div class="d-flex justify-content-end gap-2">
+
+                    <div class="d-flex justify-content-between align-items-center">
                         <a href="{{ route('notes.index') }}" class="btn btn-secondary">
-                            <i class="fas fa-arrow-left me-2"></i> Kembali
+                            <i class="fas fa-arrow-left"></i> Batal
                         </a>
                         <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save me-2"></i> Simpan Perubahan
+                            <i class="fas fa-save"></i> Simpan Perubahan
                         </button>
                     </div>
                 </form>

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Validator;
 
 class Note extends Model
 {
@@ -22,6 +23,9 @@ class Note extends Model
         static::creating(function ($note) {
             $note->judul = Str::title($note->judul);
         });
-    }
 
+        static::updating(function ($note) {
+            $note->judul = Str::title($note->judul);
+        });
+    }
 }
